@@ -26,6 +26,7 @@ This dealer will operate by these BlackJack rules:
 #include <time.h>
 #include <iostream>
 #include <list>
+#include <vector>
 
 using namespace std;
 
@@ -66,9 +67,10 @@ public:
 		return NumCards;
 	}
 	// gets the array of cards that make up the hand
-	Card* GetHand()
+	std::vector<Card> GetHand()
 	{
-		return Cards;
+		std::vector<Card> TempCards = Cards;
+		return TempCards;
 	}
 	// check to see if the hand is done
 	bool GetDoneState()
@@ -76,7 +78,7 @@ public:
 		return Done;
 	}
 private:
-	Card Cards[5];
+	std::vector<Card> Cards;
 	unsigned int NumCards;
 	unsigned int HandValue;
 	bool IsPlayer;
