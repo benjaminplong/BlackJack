@@ -6,6 +6,9 @@ This dealer will operate by these BlackJack rules:
 3. Players will be allowed to take the following actions during their turn
 	a.) "Hit" the player wishes to take 1 more card from the "shoe"
 	b.) "Stay" the player wishes to keep their current total and allows the dealer to now play
+	c.) "Split" if a player's first two cards are identical in value, the player may split them into two hands
+	d.) "Double Down" if a player's first two cards equal 9,10, or 11 the player may double their bet in exchange for one, and only one
+	     more card.
 4. The Player will "Win" under the following conditions:
 	a.) The Dealer "busts" with a total more than 21. (Pays 1 to 1)
 	b.) The Player has a higher total than the dealer, without going over 21. (Pays 1 to 1)
@@ -25,7 +28,6 @@ This dealer will operate by these BlackJack rules:
 #include <cstdlib>
 #include <time.h>
 #include <iostream>
-#include <list>
 #include <vector>
 
 using namespace std;
@@ -67,7 +69,7 @@ public:
 		return NumCards;
 	}
 	// gets the array of cards that make up the hand
-	std::vector<Card> GetHand()
+	std::vector<Card> GetCards()
 	{
 		std::vector<Card> TempCards = Cards;
 		return TempCards;
@@ -102,17 +104,21 @@ private:
 	void PlayDealer();
 	// checks for hand winner
 	void CheckWinner();
+	// checks if all the players hands have busted
+	bool CheckPlayerBust();
 
 	unsigned int PlayerChips;
 	Card Wheel[NUMBER_OF_CARDS];
 	Hand DealerHand;
 	unsigned int NextCardIndex;
 	unsigned int PlayerBet;
+	unsigned int OriginalPlayerBet;
 	unsigned int wins;
 	unsigned int losses;
+	unsigned int pushes;
 	unsigned int HandNumber;
 	bool GameOver;
-	list<Hand*> PlayerHands;
+	std::vector<Hand*> PlayerHands;
 
 public:
 	//initializes the dealer
@@ -144,4 +150,18 @@ public:
 	}
 	// returns the value of the Dealer's face up card
 	unsigned int GetDealerFaceUpCardValue();
+	//returns the list of player hands
+	std::vector<Hand*> GetPlayerHands()
+	{
+		return PlayerHands;
+	}
+	// splits the players hand into two new ones
+	// returns a new hand, does not delete the old one
+	Hand* Split(Hand* hand);
+	// lets the player double down for one more card
+	void DoubleDown(Hand* hand);
+	// lets the player walk away from the table
+	void PlayerQuits();
+	// checks if all of the player's hands are done
+	bool CheckAllPlayerHandsDone();
 };

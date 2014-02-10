@@ -15,6 +15,7 @@ BlackJackDealer::BlackJackDealer()
 PlayerBet(0),
 wins(0),
 losses(0),
+pushes(0),
 HandNumber(0),
 NextCardIndex(0),
 GameOver(false)
@@ -46,12 +47,15 @@ void BlackJackDealer::Hit(Hand* hand)
 	//if trying to "Hit" on a hand
 	// that previously Stayed or busted
 	// return out
-	if (hand->Done)
-		return;
+	_ASSERT(!hand->Done);
 
+	if (hand->IsPlayer)
+		cout << "Player Hits" << endl;
+	else
+		cout << "Dealer Hits" << endl;
 	Card card = GetCard();
 	_ASSERT(card != ONE);
-	hand->Cards[hand->NumCards] = card;
+	hand->Cards.push_back(card);
 	hand->NumCards++;
 	hand->HandValue += GetCardValue(card);
 
@@ -67,46 +71,39 @@ void BlackJackDealer::Hit(Hand* hand)
 				//set the value to one so we don't count it again
 				hand->Cards[i] = ONE;
 				hand->HandValue -= 10;
+				break;
 			}
 		}
 	}
 	
 	// if devaluing all the aces still causes
-	// a bust then that hand loses
-	if (hand->HandValue > 21)
+	// a bust then that hand is done
+	if (hand->HandValue > 21
+		|| (hand->NumCards == 5
+		&& hand->HandValue <= 21))
 	{
-		hand->Done = true;
-		if (hand->IsPlayer)
-		{
-			//set dealer to done because player busted
-			DealerHand.Done = true;
-			PlayerLoses();
-		}
-		else
-			PlayerWins();
-	}
-	else if (hand->NumCards == 5
-		&& hand->HandValue <= 21)
-	{
-		hand->Done = true;
-		if (hand->IsPlayer)
-		{
-			//set dealer to done because player won
-			DealerHand.Done = true;
-			PlayerWins();
-		}
-		else
-			PlayerLoses();
+		Stay(hand);
 	}
 }
 // function called when a hand "stays"
 void BlackJackDealer::Stay(Hand* hand)
 {
-	hand->Done = true;
+	if (hand->Done)
+		return;
+
 	if (hand->IsPlayer)
-		PlayDealer();
+		cout << "Player Stays" << endl;
 	else
-		CheckWinner();
+		cout << "Dealer Stays" << endl;
+
+	hand->Done = true;
+	if (CheckAllPlayerHandsDone())
+	{
+		if (hand->IsPlayer)
+			PlayDealer();
+		else
+			CheckWinner();
+	}
 }
 // Call this function to start a new hand
 // Player will be dealt 2 cards and dealer will be delt 2 cards
@@ -116,6 +113,11 @@ Hand* BlackJackDealer::StartHand()
 	// has played the maximum number of hands
 	if (GameOver)
 		return nullptr;
+	//make sure the last hand has finished before starting a new one
+	_ASSERT(PlayerHands.empty());
+	// set the players bet back to the last value "set" by the player
+	// comes into play after the player has doubled down or split hands
+	PlayerBet = OriginalPlayerBet;
 	// if player wants to bet more than his total chips
 	// then he will bet all of his remaining chips
 	if (PlayerBet > PlayerChips)
@@ -127,29 +129,32 @@ Hand* BlackJackDealer::StartHand()
 	Hand* Player = new Hand();
 	Player->IsPlayer = true;
 	Card PlayerCardOne = GetCard();
-	Player->Cards[Player->NumCards] = PlayerCardOne;
+	Player->Cards.push_back(PlayerCardOne);
 	Player->HandValue += GetCardValue(PlayerCardOne);
 	Player->NumCards++;
 
 	Card DealerCardOne = GetCard();
-	DealerHand.Cards[DealerHand.NumCards] = DealerCardOne;
+	DealerHand.Cards.push_back(DealerCardOne);
 	DealerHand.HandValue += GetCardValue(DealerCardOne);
 	DealerHand.NumCards++;
 
 	Card PlayerCardTwo = GetCard();
-	Player->Cards[Player->NumCards] = PlayerCardTwo;
+	Player->Cards.push_back(PlayerCardTwo);
 	Player->HandValue += GetCardValue(PlayerCardTwo);
 	Player->NumCards++;
 
 	Card DealerCardTwo = GetCard();
-	DealerHand.Cards[DealerHand.NumCards] = DealerCardTwo;
+	DealerHand.Cards.push_back(DealerCardTwo);
 	DealerHand.HandValue += GetCardValue(DealerCardTwo);
 	DealerHand.NumCards++;
 
+	// add the players hand to the tracking vector
+	PlayerHands.push_back(Player);
 	// blackjack
 	if (Player->HandValue == 21)
 	{
 		Player->Done = true;
+		DealerHand.Done = true;
 		PlayerBlackJack();
 	}
 	//Dealer BlackJack
@@ -158,8 +163,10 @@ Hand* BlackJackDealer::StartHand()
 		Player->Done = true;
 		DealerHand.Done = true;
 		PlayerLoses();
+		//need to do a special clear here because of dealer blackjack
+		PlayerHands.clear();
 	}
-	PlayerHands.push_back(Player);
+	
 	return Player;
 }
 // returns the value of the passed in card
@@ -182,7 +189,7 @@ unsigned int BlackJackDealer::GetCardValue(Card card)
 void BlackJackDealer::SetPlayerBet(unsigned int bet)
 {
 	if (bet < PlayerChips)
-		PlayerBet = bet;
+		OriginalPlayerBet = bet;
 }
 // handles a player "BlackJack"
 void BlackJackDealer::PlayerBlackJack()
@@ -191,6 +198,9 @@ void BlackJackDealer::PlayerBlackJack()
 	DealerHand.Done = true;
 	PlayerChips += static_cast<int>(PlayerBet * 1.5);
 	wins++;
+	cout << "Player BlackJack!" << endl;
+
+	PlayerHands.clear();
 }
 //counts player loss
 void BlackJackDealer::PlayerLoses()
@@ -215,11 +225,11 @@ void BlackJackDealer::PlayerWins()
 //prints results
 void BlackJackDealer::PrintResults()
 {
-	cout << ("The Players final statistics are:") << endl;
+	cout << ("The Player's final statistics are:") << endl;
 	cout << "Total Chips:\t" << PlayerChips << endl;
 	cout << "Wins:\t" << wins << endl;
 	cout << "Losses:\t" << losses << endl;
-	cout << "Win Percentage:\t" << static_cast<float>(wins / losses) << endl;
+	cout << "Pushes:\t" << pushes << endl;
 
 	GameOver = true;
 }
@@ -228,25 +238,126 @@ void BlackJackDealer::CheckWinner()
 {
 	for (Hand* hand : PlayerHands)
 	{
-		if (hand->HandValue > DealerHand.HandValue)
-			PlayerWins();
-		else if (hand->HandValue < DealerHand.HandValue)
+		if (hand->HandValue > 21)
+		{
+			cout << "Player Bust: \t" << hand->GetValue() << endl;
 			PlayerLoses();
+		}
+		else if (DealerHand.HandValue > 21)
+		{
+			cout << "Dealer Bust: \t" << DealerHand.HandValue << endl;
+			PlayerWins();
+		}
+		else if (hand->HandValue > DealerHand.HandValue)
+		{
+			cout << "Player Wins: \t" << hand->GetValue() << " to " << DealerHand.HandValue << endl;
+			PlayerWins();
+		}
+		else if (hand->HandValue < DealerHand.HandValue)
+		{
+			cout << "Player Lost: \t" << DealerHand.HandValue << " to " << hand->GetValue() << endl;
+			PlayerLoses();
+		}
+		else
+		{
+			cout << "Push" << endl;
+			pushes++;
+		}
 	}
+
+	PlayerHands.clear();
 }
 // runs dealer logic
 void BlackJackDealer::PlayDealer()
 {
-	while (DealerHand.HandValue < 17)
+	if (!CheckPlayerBust())
 	{
-		Hit(&DealerHand);
+		while (DealerHand.HandValue < 17 && !DealerHand.Done)
+		{
+			Hit(&DealerHand);
+		}
+		//if dealer did not bust or win on 5 cards stay
+		if (!DealerHand.Done)
+			Stay(&DealerHand);
 	}
-	//if dealer did not bust or win on 5 cards stay
-	if (!DealerHand.Done)
+	else
 		Stay(&DealerHand);
 }
 // returns the value of the Dealer's face up card
 unsigned int BlackJackDealer::GetDealerFaceUpCardValue()
 {
 	return GetCardValue(DealerHand.Cards[1]);
+}
+
+// checks if all of the player's hands are done
+bool BlackJackDealer::CheckAllPlayerHandsDone()
+{
+	bool done = true;
+	for (Hand* hand : PlayerHands)
+	{
+		done &= hand->Done;
+	}
+
+	return done;
+}
+// checks if all the players hands have busted
+bool BlackJackDealer::CheckPlayerBust()
+{
+	bool bust = true;
+	for (Hand* hand : PlayerHands)
+	{
+		bust &= (hand->HandValue > 21);
+	}
+
+	return bust;
+}
+
+//Lets the player split the passed in hand
+Hand* BlackJackDealer::Split(Hand* hand)
+{
+	_ASSERT(hand->NumCards == 2);
+	_ASSERT(hand->Cards[0] == hand->Cards[1]);
+
+	Hand* newHand = new Hand();
+	Card card = hand->Cards[1];
+	newHand->Cards.push_back(card);
+	newHand->NumCards++;
+	newHand->HandValue += GetCardValue(card);
+
+	hand->Cards.pop_back();
+
+	Card newCardOne = GetCard();
+	hand->Cards.push_back(newCardOne);
+	hand->HandValue -= GetCardValue(card);
+	hand->HandValue += GetCardValue(newCardOne);
+
+	Card newCardTwo = GetCard();
+	newHand->Cards.push_back(newCardTwo);
+	newHand->NumCards++;
+	newHand->HandValue += GetCardValue(newCardTwo);
+
+	PlayerHands.push_back(newHand);
+	return newHand;
+}
+
+// lets the player double down for one more card
+void BlackJackDealer::DoubleDown(Hand* hand)
+{
+	cout << "Player DoublesDown" << endl;
+	_ASSERT(hand->NumCards == 2);
+	_ASSERT(hand->GetValue() == 9 || hand->GetValue() == 10 || hand->GetValue() == 11);
+	//doubles the players bet
+	PlayerBet *= 2;
+	Hit(hand);
+
+	Stay(hand);
+}
+
+//lets the player walk away
+void BlackJackDealer::PlayerQuits()
+{
+	_ASSERT(!GameOver);
+	cout << "PlayerQuits" << endl;
+	GameOver = true;
+	PrintResults();
 }
