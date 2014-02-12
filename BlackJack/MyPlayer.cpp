@@ -50,7 +50,7 @@ int main()
 		// after all the players hands are done the dealer will be automatically played
 		// at this point the player can ask for the dealer's hand to look at the cards the dealer
 		// had
-		Hand DealerHand = Dealer.GetDealerHand();
+		Hand* DealerHand = Dealer.GetDealerHand();
 		// if the player wants to walk away at any point this is how
 		/*if (Dealer.GetPlayerChipsRemaining() >= 1000)
 		{

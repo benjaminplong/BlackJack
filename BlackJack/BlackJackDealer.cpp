@@ -124,7 +124,7 @@ Hand* BlackJackDealer::StartHand()
 		PlayerBet = PlayerChips;
 
 	HandNumber++;
-	DealerHand = Hand();
+	DealerHand = new Hand();
 	Hand* Player = new Hand();
 	Player->IsPlayer = true;
 	Card PlayerCardOne = GetCard();
@@ -133,9 +133,9 @@ Hand* BlackJackDealer::StartHand()
 	Player->NumCards++;
 
 	Card DealerCardOne = GetCard();
-	DealerHand.Cards.push_back(DealerCardOne);
-	DealerHand.HandValue += GetCardValue(DealerCardOne);
-	DealerHand.NumCards++;
+	DealerHand->Cards.push_back(DealerCardOne);
+	DealerHand->HandValue += GetCardValue(DealerCardOne);
+	DealerHand->NumCards++;
 
 	Card PlayerCardTwo = GetCard();
 	Player->Cards.push_back(PlayerCardTwo);
@@ -143,9 +143,9 @@ Hand* BlackJackDealer::StartHand()
 	Player->NumCards++;
 
 	Card DealerCardTwo = GetCard();
-	DealerHand.Cards.push_back(DealerCardTwo);
-	DealerHand.HandValue += GetCardValue(DealerCardTwo);
-	DealerHand.NumCards++;
+	DealerHand->Cards.push_back(DealerCardTwo);
+	DealerHand->HandValue += GetCardValue(DealerCardTwo);
+	DealerHand->NumCards++;
 
 	// add the players hand to the tracking vector
 	PlayerHands.push_back(Player);
@@ -153,14 +153,14 @@ Hand* BlackJackDealer::StartHand()
 	if (Player->HandValue == 21)
 	{
 		Player->Done = true;
-		DealerHand.Done = true;
+		DealerHand->Done = true;
 		PlayerBlackJack();
 	}
 	//Dealer BlackJack
-	else if (DealerHand.HandValue == 21)
+	else if (DealerHand->HandValue == 21)
 	{
 		Player->Done = true;
-		DealerHand.Done = true;
+		DealerHand->Done = true;
 		PlayerLoses();
 		//need to do a special clear here because of dealer blackjack
 		PlayerHands.clear();
@@ -196,7 +196,7 @@ void BlackJackDealer::SetPlayerBet(unsigned int bet)
 void BlackJackDealer::PlayerBlackJack()
 {
 	//set dealer to done because player won
-	DealerHand.Done = true;
+	DealerHand->Done = true;
 	PlayerChips += static_cast<int>(PlayerBet * 1.5);
 	wins++;
 	cout << "Player BlackJack!" << endl;
@@ -245,19 +245,19 @@ void BlackJackDealer::CheckWinner()
 			cout << "Player Bust: \t" << hand->GetValue() << endl;
 			PlayerLoses();
 		}
-		else if (DealerHand.HandValue > 21)
+		else if (DealerHand->HandValue > 21)
 		{
-			cout << "Dealer Bust: \t" << DealerHand.HandValue << endl;
+			cout << "Dealer Bust: \t" << DealerHand->HandValue << endl;
 			PlayerWins();
 		}
-		else if (hand->HandValue > DealerHand.HandValue)
+		else if (hand->HandValue > DealerHand->HandValue)
 		{
-			cout << "Player Wins: \t" << hand->GetValue() << " to " << DealerHand.HandValue << endl;
+			cout << "Player Wins: \t" << hand->GetValue() << " to " << DealerHand->HandValue << endl;
 			PlayerWins();
 		}
-		else if (hand->HandValue < DealerHand.HandValue)
+		else if (hand->HandValue < DealerHand->HandValue)
 		{
-			cout << "Player Lost: \t" << DealerHand.HandValue << " to " << hand->GetValue() << endl;
+			cout << "Player Lost: \t" << DealerHand->HandValue << " to " << hand->GetValue() << endl;
 			PlayerLoses();
 		}
 		else
@@ -273,21 +273,21 @@ void BlackJackDealer::PlayDealer()
 {
 	if (!CheckPlayerBust())
 	{
-		while (DealerHand.HandValue < 17 && !DealerHand.Done)
+		while (DealerHand->HandValue < 17 && !DealerHand->Done)
 		{
-			Hit(&DealerHand);
+			Hit(DealerHand);
 		}
 		//if dealer did not bust or win on 5 cards stay
-		if (!DealerHand.Done)
-			Stay(&DealerHand);
+		if (!DealerHand->Done)
+			Stay(DealerHand);
 	}
 	else
-		Stay(&DealerHand);
+		Stay(DealerHand);
 }
 // returns the value of the Dealer's face up card
 unsigned int BlackJackDealer::GetDealerFaceUpCardValue()
 {
-	return GetCardValue(DealerHand.Cards[1]);
+	return GetCardValue(DealerHand->Cards[1]);
 }
 
 // checks if all of the player's hands are done
@@ -365,7 +365,7 @@ void BlackJackDealer::PlayerQuits()
 	PrintResults();
 }
 //will return the dealer's full hand if the all of the player's hands are done
-Hand BlackJackDealer::GetDealerHand()
+Hand* BlackJackDealer::GetDealerHand()
 {
 	_ASSERT(CheckAllPlayerHandsDone());
 	return DealerHand;

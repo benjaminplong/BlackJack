@@ -110,7 +110,7 @@ private:
 	__declspec(dllexport)  Card GetCard();
 	unsigned int PlayerChips;
 	Card Wheel[NUMBER_OF_CARDS];
-	Hand DealerHand;
+	Hand* DealerHand;
 	unsigned int NextCardIndex;
 	unsigned int PlayerBet;
 	unsigned int OriginalPlayerBet;
@@ -178,5 +178,5 @@ public:
 	// checks if all of the player's hands are done
 	__declspec(dllexport) bool CheckAllPlayerHandsDone();
 	//will return the dealer's full hand if the all of the player's hands are done
-	__declspec(dllexport) Hand GetDealerHand();
+	__declspec(dllexport) Hand* GetDealerHand();
 };
