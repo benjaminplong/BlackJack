@@ -36,7 +36,7 @@ using namespace std;
 #define PLAYER_STARTING_CHIPS 1000
 #define NUMBER_OF_HANDS 1000
 enum Card{
-	ONE,
+	ONE,//used when an ACE becomes demoted in value
 	TWO,
 	THREE,
 	FOUR,
