@@ -106,7 +106,8 @@ private:
 	void CheckWinner();
 	// checks if all the players hands have busted
 	bool CheckPlayerBust();
-
+	//gets a card from the dealing wheel and replaces it with a new card.
+	__declspec(dllexport)  Card GetCard();
 	unsigned int PlayerChips;
 	Card Wheel[NUMBER_OF_CARDS];
 	Hand DealerHand;
@@ -123,8 +124,7 @@ private:
 public:
 	//initializes the dealer
 	__declspec(dllexport) BlackJackDealer();
-	//gets a card from the dealing wheel and replaces it with a new card.
-	__declspec(dllexport)  Card GetCard();
+
 	// function called when a hand "Hits"
 	__declspec(dllexport) void Hit(Hand* hand);
 	// function called when a hand "stays"
@@ -156,10 +156,15 @@ public:
 	}
 	// returns the value of the Dealer's face up card
 	__declspec(dllexport) unsigned int GetDealerFaceUpCardValue();
-	//returns the list of player hands
-	__declspec(dllexport) std::vector<Hand*> GetPlayerHands()
+	//returns the player hand at the specified index
+	__declspec(dllexport) Hand* GetPlayerHand(unsigned int index)
 	{
-		return PlayerHands;
+		return PlayerHands[index];
+	}
+	//returns the number of player hands
+	__declspec(dllexport) unsigned int GetNumPlayerHands()
+	{
+		return PlayerHands.size();
 	}
 	// splits the players hand into two new ones
 	// returns a new hand, does not delete the old one

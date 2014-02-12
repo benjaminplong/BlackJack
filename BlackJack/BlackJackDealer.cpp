@@ -124,7 +124,6 @@ Hand* BlackJackDealer::StartHand()
 		PlayerBet = PlayerChips;
 
 	HandNumber++;
-	PlayerHands.clear();
 	DealerHand = Hand();
 	Hand* Player = new Hand();
 	Player->IsPlayer = true;
@@ -188,6 +187,8 @@ unsigned int BlackJackDealer::GetCardValue(Card card)
 // sets player's bet value
 void BlackJackDealer::SetPlayerBet(unsigned int bet)
 {
+	// you cannot set the player bet while hands are still being played
+	_ASSERT(CheckAllPlayerHandsDone());
 	if (bet < PlayerChips)
 		OriginalPlayerBet = bet;
 }
@@ -209,7 +210,7 @@ void BlackJackDealer::PlayerLoses()
 	losses++;
 	//game over
 	if (PlayerChips == 0
-		|| HandNumber > NUMBER_OF_HANDS)
+		|| HandNumber >= NUMBER_OF_HANDS)
 	{
 		PrintResults();
 	}
@@ -219,7 +220,7 @@ void BlackJackDealer::PlayerWins()
 {
 	wins++;
 	PlayerChips += PlayerBet;
-	if (HandNumber > NUMBER_OF_HANDS)
+	if (HandNumber >= NUMBER_OF_HANDS)
 		PrintResults();
 }
 //prints results
@@ -232,6 +233,7 @@ void BlackJackDealer::PrintResults()
 	cout << "Pushes:\t" << pushes << endl;
 
 	GameOver = true;
+	cin.get();
 }
 // checks for hand winner
 void BlackJackDealer::CheckWinner()
@@ -264,7 +266,6 @@ void BlackJackDealer::CheckWinner()
 			pushes++;
 		}
 	}
-
 	PlayerHands.clear();
 }
 // runs dealer logic
