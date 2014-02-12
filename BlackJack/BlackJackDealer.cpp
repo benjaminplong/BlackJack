@@ -315,10 +315,12 @@ bool BlackJackDealer::CheckPlayerBust()
 //Lets the player split the passed in hand
 Hand* BlackJackDealer::Split(Hand* hand)
 {
+	cout << "Player Splits" << endl;
 	_ASSERT(hand->NumCards == 2);
-	_ASSERT(hand->Cards[0] == hand->Cards[1]);
+	_ASSERT(GetCardValue(hand->Cards[0]) == GetCardValue(hand->Cards[1]));
 
 	Hand* newHand = new Hand();
+	newHand->IsPlayer = true;
 	Card card = hand->Cards[1];
 	newHand->Cards.push_back(card);
 	newHand->NumCards++;

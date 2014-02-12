@@ -9,15 +9,11 @@ int main()
 	Dealer.SetPlayerBet(MyBet);
 
 	std::vector<Hand*> MyHands;
+	MyHands.push_back(Dealer.StartHand());
 	unsigned int currentHand = 0;
 	//MyHand will be null when the game is over
 	while (!Dealer.IsGameOver())
 	{
-		// if MyHands vector is not empty then clear it
-		if (!MyHands.empty())
-			MyHands.clear();
-		// start hand
-		MyHands.push_back(Dealer.StartHand());
 		currentHand = 0; 
 		MyChips = Dealer.GetPlayerChipsRemaining();
 		unsigned int DealerFaceUp = Dealer.GetDealerFaceUpCardValue();
@@ -31,23 +27,16 @@ int main()
 			{
 				MyHands.push_back(Dealer.Split(MyHand));
 				//increment current hand index for next execution.
+				currentHand++;
 			}
 			else
 			{
-				if (MyHand->GetValue() < 17 && !MyHand->IsDone())
+				if (MyHand->GetValue() < 17 && !MyHand->GetDoneState())
 					Dealer.Hit(MyHand);
 
 				if (MyHand->GetValue() >= 17
-					&& !MyHand->IsDone())
+					&& !MyHand->GetDoneState())
 					Dealer.Stay(MyHand);
-			}
-
-			//our current hand is done, but we have more hands to play so bump the
-			// current hand count to play the next one
-			if (MyHand->IsDone()
-				&& !Dealer.CheckAllPlayerHandsDone())
-			{
-				currentHand++;
 			}
 		}
 		// if the player wants to walk away at any point this is how
@@ -58,6 +47,8 @@ int main()
 		}*/
 		//else
 		//last hand is over so clear hands vector and start over
+		MyHands.clear();
+		MyHands.push_back(Dealer.StartHand());
+		currentHand = 0;
 	}
-	cin.get();
 }

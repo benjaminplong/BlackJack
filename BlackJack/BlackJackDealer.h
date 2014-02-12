@@ -75,7 +75,7 @@ public:
 		return TempCards;
 	}
 	// check to see if the hand is done
-	bool GetDoneState()
+	bool IsDone()
 	{
 		return Done;
 	}
@@ -122,46 +122,52 @@ private:
 
 public:
 	//initializes the dealer
-	BlackJackDealer();
+	__declspec(dllexport) BlackJackDealer();
 	//gets a card from the dealing wheel and replaces it with a new card.
-	Card GetCard();
+	__declspec(dllexport)  Card GetCard();
 	// function called when a hand "Hits"
-	void Hit(Hand* hand);
+	__declspec(dllexport) void Hit(Hand* hand);
 	// function called when a hand "stays"
-	void Stay(Hand* hand);
+	__declspec(dllexport) void Stay(Hand* hand);
 	// Call this function to start a new hand
 	// Player will be dealt 2 cards and dealer will be delt 2 cards
 	// will return nullptr when the game is over
-	Hand* StartHand();
+	__declspec(dllexport) Hand* StartHand();
 	// returns the value of the passed in card
-	unsigned int GetCardValue(Card card);
+	__declspec(dllexport) unsigned int GetCardValue(Card card);
 	// sets player's bet value
-	void SetPlayerBet(unsigned int bet);
+	__declspec(dllexport) void SetPlayerBet(unsigned int bet);
 	// gets player's bet value
-	unsigned int GetPlayerBet()
+	__declspec(dllexport) unsigned int GetPlayerBet()
 	{
 		return PlayerBet;
 	}
 
 	//get the number of chips the player has left
-	unsigned int GetPlayerChipsRemaining()
+	__declspec(dllexport) unsigned int GetPlayerChipsRemaining()
 	{
 		return PlayerChips;
 	}
+
+	//get the number of chips the player has left
+	__declspec(dllexport) unsigned int IsGameOver()
+	{
+		return GameOver;
+	}
 	// returns the value of the Dealer's face up card
-	unsigned int GetDealerFaceUpCardValue();
+	__declspec(dllexport) unsigned int GetDealerFaceUpCardValue();
 	//returns the list of player hands
-	std::vector<Hand*> GetPlayerHands()
+	__declspec(dllexport) std::vector<Hand*> GetPlayerHands()
 	{
 		return PlayerHands;
 	}
 	// splits the players hand into two new ones
 	// returns a new hand, does not delete the old one
-	Hand* Split(Hand* hand);
+	__declspec(dllexport) Hand* Split(Hand* hand);
 	// lets the player double down for one more card
-	void DoubleDown(Hand* hand);
+	__declspec(dllexport) void DoubleDown(Hand* hand);
 	// lets the player walk away from the table
-	void PlayerQuits();
+	__declspec(dllexport) void PlayerQuits();
 	// checks if all of the player's hands are done
-	bool CheckAllPlayerHandsDone();
+	__declspec(dllexport) bool CheckAllPlayerHandsDone();
 };
