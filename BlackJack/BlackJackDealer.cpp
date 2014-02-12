@@ -364,3 +364,9 @@ void BlackJackDealer::PlayerQuits()
 	GameOver = true;
 	PrintResults();
 }
+//will return the dealer's full hand if the all of the player's hands are done
+Hand BlackJackDealer::GetDealerHand()
+{
+	_ASSERT(CheckAllPlayerHandsDone());
+	return DealerHand;
+}

@@ -177,4 +177,6 @@ public:
 	__declspec(dllexport) void PlayerQuits();
 	// checks if all of the player's hands are done
 	__declspec(dllexport) bool CheckAllPlayerHandsDone();
+	//will return the dealer's full hand if the all of the player's hands are done
+	__declspec(dllexport) Hand GetDealerHand();
 };
