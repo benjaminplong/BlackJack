@@ -131,6 +131,7 @@ public:
 	__declspec(dllexport) void Stay(Hand* hand);
 	// Call this function to start a new hand
 	// Player will be dealt 2 cards and dealer will be delt 2 cards
+	// adds the staring hand to the PlayerHands collection and returns it
 	// will return nullptr when the game is over
 	__declspec(dllexport) Hand* StartHand();
 	// returns the value of the passed in card
@@ -156,7 +157,7 @@ public:
 	}
 	// returns the value of the Dealer's face up card
 	__declspec(dllexport) unsigned int GetDealerFaceUpCardValue();
-	//returns the player hand at the specified index
+	//returns the player hand at the specified index from the PlayerHands collection
 	__declspec(dllexport) Hand* GetPlayerHand(unsigned int index)
 	{
 		return PlayerHands[index];
@@ -167,7 +168,8 @@ public:
 		return PlayerHands.size();
 	}
 	// splits the players hand into two new ones
-	// returns a new hand, does not delete the old one
+	// returns the new hand after adding it to the PlayerHands collection
+	// *does not delete the old one
 	__declspec(dllexport) Hand* Split(Hand* hand);
 	// lets the player double down for one more card
 	__declspec(dllexport) void DoubleDown(Hand* hand);
