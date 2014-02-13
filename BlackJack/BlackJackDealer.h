@@ -30,6 +30,12 @@ This dealer will operate by these BlackJack rules:
 #include <iostream>
 #include <vector>
 
+#if defined (DllImportExport)
+#define DealerSetup __declspec (dllexport)
+#else
+#define DealerSetup __declspec (dllimport)
+#endif
+
 using namespace std;
 
 #define NUMBER_OF_CARDS 10
@@ -52,7 +58,7 @@ enum Card{
 	ACE
 };
 
-class Hand
+class DealerSetup Hand
 {
 	friend class BlackJackDealer;
 public:
@@ -71,7 +77,7 @@ public:
 	// gets the array of cards that make up the hand
 	std::vector<Card> GetCards()
 	{
-		std::vector<Card> TempCards = Cards;
+		std::vector<Card> TempCards = *Cards;
 		return TempCards;
 	}
 	// check to see if the hand is done
@@ -80,14 +86,14 @@ public:
 		return Done;
 	}
 private:
-	std::vector<Card> Cards;
+	std::vector<Card> *Cards;
 	unsigned int NumCards;
 	unsigned int HandValue;
 	bool IsPlayer;
 	bool Done;
 };
 
-class BlackJackDealer
+class DealerSetup BlackJackDealer
 {
 
 private:
@@ -107,7 +113,7 @@ private:
 	// checks if all the players hands have busted
 	bool CheckPlayerBust();
 	//gets a card from the dealing wheel and replaces it with a new card.
-	__declspec(dllexport)  Card GetCard();
+	Card GetCard();
 	unsigned int PlayerChips;
 	Card Wheel[NUMBER_OF_CARDS];
 	Hand* DealerHand;
@@ -119,64 +125,64 @@ private:
 	unsigned int pushes;
 	unsigned int HandNumber;
 	bool GameOver;
-	std::vector<Hand*> PlayerHands;
+	std::vector<Hand*> *PlayerHands;
 
 public:
 	//initializes the dealer
-	__declspec(dllexport) BlackJackDealer();
+	BlackJackDealer();
 
 	// function called when a hand "Hits"
-	__declspec(dllexport) void Hit(Hand* hand);
+	void Hit(Hand* hand);
 	// function called when a hand "stays"
-	__declspec(dllexport) void Stay(Hand* hand);
+	void Stay(Hand* hand);
 	// Call this function to start a new hand
 	// Player will be dealt 2 cards and dealer will be delt 2 cards
 	// adds the staring hand to the PlayerHands collection and returns it
 	// will return nullptr when the game is over
-	__declspec(dllexport) Hand* StartHand();
+	Hand* StartHand();
 	// returns the value of the passed in card
-	__declspec(dllexport) unsigned int GetCardValue(Card card);
+	unsigned int GetCardValue(Card card);
 	// sets player's bet value
-	__declspec(dllexport) void SetPlayerBet(unsigned int bet);
+	void SetPlayerBet(unsigned int bet);
 	// gets player's bet value
-	__declspec(dllexport) unsigned int GetPlayerBet()
+	unsigned int GetPlayerBet()
 	{
 		return PlayerBet;
 	}
 
 	//get the number of chips the player has left
-	__declspec(dllexport) unsigned int GetPlayerChipsRemaining()
+	unsigned int GetPlayerChipsRemaining()
 	{
 		return PlayerChips;
 	}
 
 	//get the number of chips the player has left
-	__declspec(dllexport) bool IsGameOver()
+	bool IsGameOver()
 	{
 		return GameOver;
 	}
 	// returns the value of the Dealer's face up card
-	__declspec(dllexport) unsigned int GetDealerFaceUpCardValue();
+	unsigned int GetDealerFaceUpCardValue();
 	//returns the player hand at the specified index from the PlayerHands collection
-	__declspec(dllexport) Hand* GetPlayerHand(unsigned int index)
+	Hand* GetPlayerHand(unsigned int index)
 	{
-		return PlayerHands[index];
+		return PlayerHands->at(index);
 	}
 	//returns the number of player hands
-	__declspec(dllexport) unsigned int GetNumPlayerHands()
+	unsigned int GetNumPlayerHands()
 	{
-		return PlayerHands.size();
+		return PlayerHands->size();
 	}
 	// splits the players hand into two new ones
 	// returns the new hand after adding it to the PlayerHands collection
 	// *does not delete the old one
-	__declspec(dllexport) Hand* Split(Hand* hand);
+	Hand* Split(Hand* hand);
 	// lets the player double down for one more card
-	__declspec(dllexport) void DoubleDown(Hand* hand);
+	void DoubleDown(Hand* hand);
 	// lets the player walk away from the table
-	__declspec(dllexport) void PlayerQuits();
+	void PlayerQuits();
 	// checks if all of the player's hands are done
-	__declspec(dllexport) bool CheckAllPlayerHandsDone();
+	bool CheckAllPlayerHandsDone();
 	//will return the dealer's full hand if the all of the player's hands are done
-	__declspec(dllexport) Hand* GetDealerHand();
+	Hand* GetDealerHand();
 };

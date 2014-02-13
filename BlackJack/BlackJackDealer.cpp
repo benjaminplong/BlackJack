@@ -8,7 +8,7 @@ IsPlayer(false),
 HandValue(0),
 Done(false)
 {
-
+	Cards = new std::vector<Card>();
 }
 BlackJackDealer::BlackJackDealer()
 :PlayerChips(PLAYER_STARTING_CHIPS),
@@ -21,6 +21,7 @@ NextCardIndex(0),
 GameOver(false)
 {
 	srand(time(NULL));
+	PlayerHands = new std::vector<Hand*>();
 	for(int i = 0; i < NUMBER_OF_CARDS; i++)
 	{
 		// add +1 to skip the special "ONE" enum when drawing cards
@@ -55,7 +56,7 @@ void BlackJackDealer::Hit(Hand* hand)
 		cout << "Dealer Hits" << endl;
 	Card card = GetCard();
 	_ASSERT(card != ONE);
-	hand->Cards.push_back(card);
+	hand->Cards->push_back(card);
 	hand->NumCards++;
 	hand->HandValue += GetCardValue(card);
 
@@ -66,10 +67,10 @@ void BlackJackDealer::Hit(Hand* hand)
 		// value of 1 if the hand has busted
 		for (unsigned int i = 0; i < hand->NumCards; i++)
 		{
-			if (hand->Cards[i] == ACE)
+			if (hand->Cards->at(i) == ACE)
 			{
 				//set the value to one so we don't count it again
-				hand->Cards[i] = ONE;
+				hand->Cards->at(i) = ONE;
 				hand->HandValue -= 10;
 				break;
 			}
@@ -114,7 +115,7 @@ Hand* BlackJackDealer::StartHand()
 	if (GameOver)
 		return nullptr;
 	//make sure the last hand has finished before starting a new one
-	_ASSERT(PlayerHands.empty());
+	_ASSERT(PlayerHands->empty());
 	// set the players bet back to the last value "set" by the player
 	// comes into play after the player has doubled down or split hands
 	PlayerBet = OriginalPlayerBet;
@@ -128,27 +129,27 @@ Hand* BlackJackDealer::StartHand()
 	Hand* Player = new Hand();
 	Player->IsPlayer = true;
 	Card PlayerCardOne = GetCard();
-	Player->Cards.push_back(PlayerCardOne);
+	Player->Cards->push_back(PlayerCardOne);
 	Player->HandValue += GetCardValue(PlayerCardOne);
 	Player->NumCards++;
 
 	Card DealerCardOne = GetCard();
-	DealerHand->Cards.push_back(DealerCardOne);
+	DealerHand->Cards->push_back(DealerCardOne);
 	DealerHand->HandValue += GetCardValue(DealerCardOne);
 	DealerHand->NumCards++;
 
 	Card PlayerCardTwo = GetCard();
-	Player->Cards.push_back(PlayerCardTwo);
+	Player->Cards->push_back(PlayerCardTwo);
 	Player->HandValue += GetCardValue(PlayerCardTwo);
 	Player->NumCards++;
 
 	Card DealerCardTwo = GetCard();
-	DealerHand->Cards.push_back(DealerCardTwo);
+	DealerHand->Cards->push_back(DealerCardTwo);
 	DealerHand->HandValue += GetCardValue(DealerCardTwo);
 	DealerHand->NumCards++;
 
 	// add the players hand to the tracking vector
-	PlayerHands.push_back(Player);
+	PlayerHands->push_back(Player);
 	// blackjack
 	if (Player->HandValue == 21)
 	{
@@ -163,7 +164,7 @@ Hand* BlackJackDealer::StartHand()
 		DealerHand->Done = true;
 		PlayerLoses();
 		//need to do a special clear here because of dealer blackjack
-		PlayerHands.clear();
+		PlayerHands->clear();
 	}
 	
 	return Player;
@@ -201,7 +202,7 @@ void BlackJackDealer::PlayerBlackJack()
 	wins++;
 	cout << "Player BlackJack!" << endl;
 
-	PlayerHands.clear();
+	PlayerHands->clear();
 }
 //counts player loss
 void BlackJackDealer::PlayerLoses()
@@ -238,7 +239,7 @@ void BlackJackDealer::PrintResults()
 // checks for hand winner
 void BlackJackDealer::CheckWinner()
 {
-	for (Hand* hand : PlayerHands)
+	for (Hand* hand : *PlayerHands)
 	{
 		if (hand->HandValue > 21)
 		{
@@ -266,7 +267,7 @@ void BlackJackDealer::CheckWinner()
 			pushes++;
 		}
 	}
-	PlayerHands.clear();
+	PlayerHands->clear();
 }
 // runs dealer logic
 void BlackJackDealer::PlayDealer()
@@ -287,14 +288,14 @@ void BlackJackDealer::PlayDealer()
 // returns the value of the Dealer's face up card
 unsigned int BlackJackDealer::GetDealerFaceUpCardValue()
 {
-	return GetCardValue(DealerHand->Cards[1]);
+	return GetCardValue(DealerHand->Cards->at(1));
 }
 
 // checks if all of the player's hands are done
 bool BlackJackDealer::CheckAllPlayerHandsDone()
 {
 	bool done = true;
-	for (Hand* hand : PlayerHands)
+	for (Hand* hand : *PlayerHands)
 	{
 		done &= hand->Done;
 	}
@@ -305,7 +306,7 @@ bool BlackJackDealer::CheckAllPlayerHandsDone()
 bool BlackJackDealer::CheckPlayerBust()
 {
 	bool bust = true;
-	for (Hand* hand : PlayerHands)
+	for (Hand* hand : *PlayerHands)
 	{
 		bust &= (hand->HandValue > 21);
 	}
@@ -318,28 +319,28 @@ Hand* BlackJackDealer::Split(Hand* hand)
 {
 	cout << "Player Splits" << endl;
 	_ASSERT(hand->NumCards == 2);
-	_ASSERT(GetCardValue(hand->Cards[0]) == GetCardValue(hand->Cards[1]));
+	_ASSERT(GetCardValue(hand->Cards->at(0)) == GetCardValue(hand->Cards->at(1)));
 
 	Hand* newHand = new Hand();
 	newHand->IsPlayer = true;
-	Card card = hand->Cards[1];
-	newHand->Cards.push_back(card);
+	Card card = hand->Cards->at(1);
+	newHand->Cards->push_back(card);
 	newHand->NumCards++;
 	newHand->HandValue += GetCardValue(card);
 
-	hand->Cards.pop_back();
+	hand->Cards->pop_back();
 
 	Card newCardOne = GetCard();
-	hand->Cards.push_back(newCardOne);
+	hand->Cards->push_back(newCardOne);
 	hand->HandValue -= GetCardValue(card);
 	hand->HandValue += GetCardValue(newCardOne);
 
 	Card newCardTwo = GetCard();
-	newHand->Cards.push_back(newCardTwo);
+	newHand->Cards->push_back(newCardTwo);
 	newHand->NumCards++;
 	newHand->HandValue += GetCardValue(newCardTwo);
 
-	PlayerHands.push_back(newHand);
+	PlayerHands->push_back(newHand);
 	return newHand;
 }
 
