@@ -8,15 +8,16 @@ namespace CSharpTest
 {
     class Program
     {
+
+        [DllImport("BlackJackDealer.dll", EntryPoint = "IsGameOver")]
+        bool IsGameOver();
+        [DllImport("BlackJackDealer.dll", EntryPoint = "BlackJackDealer")]
+        BlackJackDealer* BlackJackDealer();
         static void Main(string[] args)
         {
+
         }
     }
 }
 
-namespace BlackJackDealer
-{
-    [DllImport("BlackJackDealer.dll", EntryPoint = "IsGameOver", CharSet = Unicode)]
-   int MessageBox(void* hWnd, wchar_t* lpText, wchar_t* lpCaption, 
-                  unsigned int uType);
-}
+
