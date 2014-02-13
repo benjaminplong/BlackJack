@@ -150,7 +150,7 @@ public:
 	}
 
 	//get the number of chips the player has left
-	__declspec(dllexport) unsigned int IsGameOver()
+	__declspec(dllexport) bool IsGameOver()
 	{
 		return GameOver;
 	}
