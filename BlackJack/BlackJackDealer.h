@@ -36,7 +36,7 @@ using namespace std;
 #define PLAYER_STARTING_CHIPS 1000
 #define NUMBER_OF_HANDS 1000
 enum Card{
-	ONE,
+	ONE,//used when an ACE becomes demoted in value
 	TWO,
 	THREE,
 	FOUR,
@@ -106,10 +106,11 @@ private:
 	void CheckWinner();
 	// checks if all the players hands have busted
 	bool CheckPlayerBust();
-
+	//gets a card from the dealing wheel and replaces it with a new card.
+	__declspec(dllexport)  Card GetCard();
 	unsigned int PlayerChips;
 	Card Wheel[NUMBER_OF_CARDS];
-	Hand DealerHand;
+	Hand* DealerHand;
 	unsigned int NextCardIndex;
 	unsigned int PlayerBet;
 	unsigned int OriginalPlayerBet;
@@ -123,14 +124,14 @@ private:
 public:
 	//initializes the dealer
 	__declspec(dllexport) BlackJackDealer();
-	//gets a card from the dealing wheel and replaces it with a new card.
-	__declspec(dllexport)  Card GetCard();
+
 	// function called when a hand "Hits"
 	__declspec(dllexport) void Hit(Hand* hand);
 	// function called when a hand "stays"
 	__declspec(dllexport) void Stay(Hand* hand);
 	// Call this function to start a new hand
 	// Player will be dealt 2 cards and dealer will be delt 2 cards
+	// adds the staring hand to the PlayerHands collection and returns it
 	// will return nullptr when the game is over
 	__declspec(dllexport) Hand* StartHand();
 	// returns the value of the passed in card
@@ -156,13 +157,19 @@ public:
 	}
 	// returns the value of the Dealer's face up card
 	__declspec(dllexport) unsigned int GetDealerFaceUpCardValue();
-	//returns the list of player hands
-	__declspec(dllexport) std::vector<Hand*> GetPlayerHands()
+	//returns the player hand at the specified index from the PlayerHands collection
+	__declspec(dllexport) Hand* GetPlayerHand(unsigned int index)
 	{
-		return PlayerHands;
+		return PlayerHands[index];
+	}
+	//returns the number of player hands
+	__declspec(dllexport) unsigned int GetNumPlayerHands()
+	{
+		return PlayerHands.size();
 	}
 	// splits the players hand into two new ones
-	// returns a new hand, does not delete the old one
+	// returns the new hand after adding it to the PlayerHands collection
+	// *does not delete the old one
 	__declspec(dllexport) Hand* Split(Hand* hand);
 	// lets the player double down for one more card
 	__declspec(dllexport) void DoubleDown(Hand* hand);
@@ -170,4 +177,6 @@ public:
 	__declspec(dllexport) void PlayerQuits();
 	// checks if all of the player's hands are done
 	__declspec(dllexport) bool CheckAllPlayerHandsDone();
+	//will return the dealer's full hand if the all of the player's hands are done
+	__declspec(dllexport) Hand* GetDealerHand();
 };
