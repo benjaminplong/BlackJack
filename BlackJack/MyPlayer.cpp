@@ -21,22 +21,22 @@ int main()
 		{
 			Hand* MyHand = Dealer.GetPlayerHand(currentHand);
 			std::vector<Card> MyCards = MyHand->GetCards();
-			//if ((MyHand->GetValue() >= 9 && MyHand->GetValue() <= 11) && MyHand->GetNumCards() == 2)
-			//	Dealer.DoubleDown(MyHand);
-			//else if (Dealer.GetCardValue(MyCards[0]) == Dealer.GetCardValue(MyCards[1]))
-			//{
-			//	Dealer.Split(MyHand);
-			//	//increment current hand index for next execution.
-			//}
-			//else
-			//{
+			if ((MyHand->GetValue() >= 9 && MyHand->GetValue() <= 11) && MyHand->GetNumCards() == 2)
+				Dealer.DoubleDown(MyHand);
+			else if (Dealer.GetCardValue(MyCards[0]) == Dealer.GetCardValue(MyCards[1]))
+			{
+				Dealer.Split(MyHand);
+				//increment current hand index for next execution.
+			}
+			else
+			{
 				if (MyHand->GetValue() < 17 && !MyHand->IsDone())
 					Dealer.Hit(MyHand);
 
 				if (MyHand->GetValue() >= 17
 					&& !MyHand->IsDone())
 					Dealer.Stay(MyHand);
-			//}
+			}
 
 			//our current hand is done, but we have more hands to play so bump the
 			// current hand count to play the next one

@@ -156,6 +156,7 @@ Hand* BlackJackDealer::StartHand()
 		Player->Done = true;
 		DealerHand->Done = true;
 		PlayerBlackJack();
+		return nullptr;
 	}
 	//Dealer BlackJack
 	else if (DealerHand->HandValue == 21)
@@ -165,6 +166,15 @@ Hand* BlackJackDealer::StartHand()
 		PlayerLoses();
 		//need to do a special clear here because of dealer blackjack
 		PlayerHands->clear();
+		return nullptr;
+	}
+
+	//decrement an ace if you have 2
+	if(Player->Cards->at(0) == ACE
+		&& Player->Cards->at(1) == ACE)
+	{
+		Player->Cards->at(0) = ONE;
+		Player->HandValue -= 10;
 	}
 	
 	return Player;
@@ -319,7 +329,23 @@ Hand* BlackJackDealer::Split(Hand* hand)
 {
 	cout << "Player Splits" << endl;
 	_ASSERT(hand->NumCards == 2);
+	// restore ones to aces
+	for (unsigned int i = 0; i < hand->NumCards; i++)
+	{
+		if (hand->Cards->at(i) == ONE)
+		{
+			//set the value to one so we don't count it again
+			hand->Cards->at(i) = ACE;
+			hand->HandValue += 10;
+			break;
+		}
+	}
 	_ASSERT(GetCardValue(hand->Cards->at(0)) == GetCardValue(hand->Cards->at(1)));
+	if(PlayerChips < (PlayerBet*2))
+	{
+		cout << "Player does not have enough chips to split" << endl;
+		_ASSERT(false);
+	}
 
 	Hand* newHand = new Hand();
 	newHand->IsPlayer = true;
@@ -350,6 +376,11 @@ void BlackJackDealer::DoubleDown(Hand* hand)
 	cout << "Player DoublesDown" << endl;
 	_ASSERT(hand->NumCards == 2);
 	_ASSERT(hand->GetValue() == 9 || hand->GetValue() == 10 || hand->GetValue() == 11);
+	if(PlayerChips < (PlayerBet*2))
+	{
+		cout << "Player does not have enough chips to double down" << endl;
+		_ASSERT(false);
+	}
 	//doubles the players bet
 	PlayerBet *= 2;
 	Hit(hand);
