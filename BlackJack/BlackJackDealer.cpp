@@ -20,7 +20,7 @@ HandNumber(0),
 NextCardIndex(0),
 GameOver(false)
 {
-	srand(time(NULL));
+	srand(21);
 	PlayerHands = new std::vector<Hand*>();
 	for(int i = 0; i < NUMBER_OF_CARDS; i++)
 	{
@@ -177,6 +177,14 @@ Hand* BlackJackDealer::StartHand()
 		Player->HandValue -= 10;
 	}
 	
+
+	if(DealerHand->Cards->at(0) == ACE
+		&& DealerHand->Cards->at(1) == ACE)
+	{
+		DealerHand->Cards->at(0) = ONE;
+		DealerHand->HandValue -= 10;
+	}
+	
 	return Player;
 }
 // returns the value of the passed in card
@@ -200,7 +208,8 @@ void BlackJackDealer::SetPlayerBet(unsigned int bet)
 {
 	// you cannot set the player bet while hands are still being played
 	_ASSERT(CheckAllPlayerHandsDone());
-	if (bet < PlayerChips)
+	_ASSERT(bet != 0);
+	if (bet <= PlayerChips)
 		OriginalPlayerBet = bet;
 }
 // handles a player "BlackJack"
